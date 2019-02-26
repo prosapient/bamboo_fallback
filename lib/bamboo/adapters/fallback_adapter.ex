@@ -43,4 +43,5 @@ defmodule Bamboo.FallbackAdapter do
       result -> result
     end
   end
+  def supports_attachments?, do: true
 end

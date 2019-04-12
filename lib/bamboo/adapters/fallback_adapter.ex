@@ -12,7 +12,6 @@ defmodule Bamboo.FallbackAdapter do
       ]
   """
   @behaviour Bamboo.Adapter
-  require Logger
 
   def handle_config(config) do
     config
@@ -29,19 +28,25 @@ defmodule Bamboo.FallbackAdapter do
 
   def deliver(email, %{fallback_options: adapter_configs}) do
     adapter_configs
-    |> Enum.reduce_while(:no_result, fn {adapter, config}, _result ->
+    |> Enum.reduce_while([], fn {adapter, config}, errors ->
       try do
         {:halt, adapter.deliver(email, config)}
       rescue
         e in Bamboo.ApiError ->
-          Logger.error(e.message)
-          {:cont, :no_result}
+          {:cont, [e | errors]}
       end
     end)
     |> case do
-      :no_result -> Bamboo.ApiError.raise_api_error("None of given providers sent an email")
-      result -> result
+      %Bamboo.Email{} = email ->
+        email
+
+      errors ->
+        Bamboo.ApiError.raise_api_error("""
+        None of given providers sent an email
+        #{errors |> Enum.map(& &1.message) |> Enum.join("\n\n")}
+        """)
     end
   end
+
   def supports_attachments?, do: true
 end

@@ -28,7 +28,7 @@ defmodule Bamboo.Adapters.FallbackAdapterTest do
   end
 
   test "deliver/2" do
-    email = :email
+    email = Bamboo.Email.new_email()
 
     config = %{
       fallback_options: [
@@ -38,26 +38,26 @@ defmodule Bamboo.Adapters.FallbackAdapterTest do
     }
 
     MockAdapter
-    |> expect(:deliver, fn _email, _config -> :woohoo end)
+    |> expect(:deliver, fn _email, _config -> email end)
 
-    assert :woohoo == FallbackAdapter.deliver(email, config)
+    assert email == FallbackAdapter.deliver(email, config)
 
     MockAdapter
     |> expect(:deliver, fn _email, _config -> Bamboo.ApiError.raise_api_error("ooops") end)
-    |> expect(:deliver, fn _email, _config -> :woohoo end)
+    |> expect(:deliver, fn _email, _config -> email end)
 
     assert capture_log(fn ->
-             assert :woohoo == FallbackAdapter.deliver(email, config)
-           end) =~ "ooops"
+             assert email == FallbackAdapter.deliver(email, config)
+           end) == ""
 
     MockAdapter
     |> expect(:deliver, fn _email, _config -> Bamboo.ApiError.raise_api_error("ooops1") end)
     |> expect(:deliver, fn _email, _config -> Bamboo.ApiError.raise_api_error("ooops2") end)
 
-    assert capture_log(fn ->
-             assert_raise Bamboo.ApiError, "None of given providers sent an email", fn ->
-               FallbackAdapter.deliver(email, config)
-             end
-           end) =~ "ooops"
+    assert_raise Bamboo.ApiError,
+                 "None of given providers sent an email\nooops2\n\nooops1\n",
+                 fn ->
+                   FallbackAdapter.deliver(email, config)
+                 end
   end
 end

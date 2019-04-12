@@ -37,14 +37,14 @@ defmodule Bamboo.FallbackAdapter do
       end
     end)
     |> case do
-      %Bamboo.Email{} = email ->
-        email
-
-      errors ->
+      errors when is_list(errors) ->
         Bamboo.ApiError.raise_api_error("""
         None of given providers sent an email
         #{errors |> Enum.map(& &1.message) |> Enum.join("\n\n")}
         """)
+
+      email ->
+        email
     end
   end
 

@@ -38,9 +38,9 @@ defmodule Bamboo.FallbackAdapter.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:bamboo, "~> 1.1"},
-      {:mox, "~> 0.4", only: :test},
-      {:ex_doc, ">= 0.0.0", only: :dev}
+      {:bamboo, "~> 2.1"},
+      {:mox, "~> 1.0", only: :test},
+      {:ex_doc, "~> 0.24", only: :dev}
     ]
   end
 end

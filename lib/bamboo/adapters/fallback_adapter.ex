@@ -4,12 +4,13 @@ defmodule Bamboo.FallbackAdapter do
   It applies adapters one by one and fails only when all adapters fail.
 
   Config example:
-    config :myapp, MyApp.Mailer,
-      adapter:  Bamboo.FallbackAdapter,
-      fallback_options: [
-        {Bamboo.SendGridAdapter, api_key: "SENDGRID_API_KEY"},
-        {Bamboo.MailgunAdapter, api_key: "MAILGUN_API_KEY", domain: "MAILGUN_DOMAIN"}
-      ]
+
+      config :myapp, MyApp.Mailer,
+        adapter:  Bamboo.FallbackAdapter,
+        fallback_options: [
+          {Bamboo.SendGridAdapter, api_key: "SENDGRID_API_KEY"},
+          {Bamboo.MailgunAdapter, api_key: "MAILGUN_API_KEY", domain: "MAILGUN_DOMAIN"}
+        ]
   """
   @behaviour Bamboo.Adapter
 

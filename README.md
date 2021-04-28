@@ -11,7 +11,7 @@ The package can be installed by adding `bamboo_fallback` to your list of depende
 ```elixir
 def deps do
   [
-    {:bamboo_fallback, "~> 0.3.1"}
+    {:bamboo_fallback, "~> 2.0"}
   ]
 end
 ```

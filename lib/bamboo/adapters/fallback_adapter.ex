@@ -29,22 +29,26 @@ defmodule Bamboo.FallbackAdapter do
   def deliver(email, %{fallback_options: adapter_configs}) do
     adapter_configs
     |> Enum.reduce_while([], fn {adapter, config}, errors ->
-      try do
-        {:halt, adapter.deliver(email, config)}
-      rescue
-        e in Bamboo.ApiError ->
+      case adapter.deliver(email, config) do
+        {:ok, email} ->
+          {:halt, email}
+
+        {:error, e} ->
           {:cont, [e | errors]}
       end
     end)
     |> case do
       errors when is_list(errors) ->
-        Bamboo.ApiError.raise_api_error("""
-        None of given providers sent an email
-        #{errors |> Enum.map(& &1.message) |> Enum.join("\n\n")}
-        """)
+        api_error =
+          Bamboo.ApiError.build_api_error("""
+          None of given providers sent an email
+          #{errors |> Enum.map(& &1.message) |> Enum.join("\n\n")}
+          """)
+
+        {:error, api_error}
 
       email ->
-        email
+        {:ok, email}
     end
   end
 
